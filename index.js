@@ -45,7 +45,12 @@ app.get('/users', (req, res, next) => {
 
   db.all(query)
   .then((users) => {
-    res.send(users)
+    res.format({
+      html: () => { res.render('users/index', {
+        users: users
+      }) },
+      json: () => { res.send(users) }
+    })
   }).catch(next)
 .catch(next)
 })
@@ -53,10 +58,10 @@ app.get('/users', (req, res, next) => {
 //get - méthode post
 app.get('/users/create', (req, res, next) =>{
   res.render('post', {
-  title: 'méthode post',
-  name: 'Tata', 
-  content: 'page post nodejs',
-  action: '/users/create'
+    title: 'méthode post',
+    name: 'Tata', 
+    content: 'page post nodejs',
+    action: '/users/create'
   })
 })
 
@@ -74,7 +79,7 @@ app.post('/users/create', (req, res, next) =>{
 app.delete('/users/:userId', (req, res, next) => {
   db.run('DELETE FROM users WHERE ROWID = ?', req.params.userId)
   .then(() => {
-    res.send('User deleted.')
+    res.redirect('/users')
   }).catch(next)
 })
 
@@ -82,22 +87,28 @@ app.delete('/users/:userId', (req, res, next) => {
 // UPDATE USER
 app.put('/users/:userId', (req, res, next) => {
   db.run("UPDATE users SET pseudo = ?, email = ?, firstname = ?, lastname = ?, updatedAt= ? WHERE rowid = ?",req.body.pseudo, req.body.email, req.body.firstname, req.body.lastname, new Date(), req.params.userId)
-  .then(() => {
-    res.send('OK')
+  .then((users) => {
+    res.format({
+      html: () => { res.render('users/index', {
+        users: users
+      }) },
+      json: () => { res.send(users) }
+    })
   }).catch(next)
+.catch(next)
 })
 
 // ERROR
 app.use((err, req, res, next) => {
   console.log('ERR: ' + err)
   res.status(500)
-  res.send('Server Error')
+  res.send('marche pas gros nul')
 })
 
 // 501
 app.use((req, res) => {
   res.status(501)
-  res.end('Not implemented')
+  res.end('marche toujours pas gros nul')
 })
 
 app.listen(PORT, () => {
